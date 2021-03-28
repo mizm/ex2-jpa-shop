@@ -58,3 +58,6 @@ Team t = em.find(Team.class, m.getTeamId());
 4. 다대다 @ManyToMany -> 실무에서 사용 x
     - 연결 테이블을 추가해서 일대다 , 다대일 관계로 풀어내야함
     - 객체는 다대다 관계가 가능함
+    - 연결 테이블을 @Entity로 승격
+    - member -< memberProduct >- product 관계로 풀어내야함
+    - 실무에서는 그냥 테이블에 왠만하면 generate value로 id 값을 잡아주는거 권장
