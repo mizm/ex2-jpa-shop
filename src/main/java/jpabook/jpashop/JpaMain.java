@@ -23,7 +23,6 @@ public class JpaMain {
 
 			Order order = new Order();
 
-
 			tx.commit();
 		} catch (Exception e) {
 			tx.rollback();
