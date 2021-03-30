@@ -202,3 +202,33 @@ refMember.getName();
     - **복잡한 방법이 많기 때문에 실무에서는 컬렉션으로 들어갈 친구는 entity로 승격한다.**
     - 위의 경우에 @OneToMany(cascade = ALL, orphanRemoval = true) 로 선언한다.
     - 값타입을 사용할때는 아주 단순할때 List<String> 정도로 풀 수 있을때.
+
+
+## 객체지향 쿼리언어
+
+### JPQL
+- 객체지향sql
+- 가장 단순한 조회방법
+    - EntityManager.find()
+    - 객체 그래프 탐색 a.get().getb()
+- 검색을 할떄도 엔티티 객체를 대상으로 검색 ( 테이블을 검색하는 것이 아니다. )
+- sql을 추상화
+- select / from / where /group by / having /join 안심표준 사용 가능
+
+### JPA Criteria
+- 자바코드 기반 쿼리 생성
+- 자바코드 기반이기때문에 오타에 대한 걱정이 적음
+- 하지만 sql처럼 눈으로 안보임
+- 실무에서 잘 안씀
+- 차라리 QueryDSL을 쓴다.
+
+
+### QueryDSL
+- 자바코드 기반
+- 단순하고 쉬움
+- 실무에서 좋은듯
+- www.querydsl.com
+- jpql을 먼저 알아야함
+
+### JDBC
+- 영속성 컨텍스트와 상관 없기 때문에 적당한 타이밍에 flush() 해줘야함.
