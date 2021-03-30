@@ -215,6 +215,129 @@ refMember.getName();
 - sql을 추상화
 - select / from / where /group by / having /join 안심표준 사용 가능
 
+### JPQL 기본문법
+- jpql은 sql을 추상화해서 특정 데이터베이스 sql에 의존하지 않는다.
+- jpql은 결국 sql로 나온다.
+- 문법은 sql과 비슷함.
+    - `select m from Member as m where m.age > 18`
+    - from 절에서는 엔티티의 이름을 사용함 
+    - 별칭은 필수 as 생략가능
+    - 안심 sql 은 사용가능 count, max, avg, sum , group by , order by 등등 사용가능
+- TypeQuery, Query
+    - TypeQuery<Member> : return 값이 정확할때
+    - Query : 반환 타입값이 명확하지 않을때
+- 결과 반환
+    - getResultList() -> 한개 이상일 경우 리스트 반환
+    - getSingleResult(); 결과가 정확히 하나
+        - 두개거나 없으면 exception터짐
+        - Spring Data Jpa -> 결과가 없으면 Null or Optional로 반환
+- 파라미터 바인딩
+    - 포지션으로 쓰지말고 이름 입력해서 쓰자
+
+### projection
+    - select m from Memmber m -> 엔티티 프로젝션
+        - 영속성 컨텍스트에서 관리해줌
+    - select m.team from Member m -> 엔티티 프로젝션
+        - result를 Team으로 받아야함
+        - 실행하면 join query가 나감
+        - 조인 쿼리가 나가지 않게 왠만하면 sql과 비슷하게 씁시다.
+    - select m.address from Member m -> 임베디드 타입 프로젝션
+    - select m.username, m.name from Member m -> 스칼라 타입
+        - query Type 조회 : em.createQuery() -> Object[]로 조회
+        - List<Object[]> result = em.createQuery()
+        - new 명령어 조회 dto로 바로 조회
+```java
+List<MeberDTO> result = em.createQuery("select new jpql.MeberDTO(m.name,m.age) from Member m")
+        .getResultList();
+    MeberDTO meberDTO = result.get(0);
+    System.out.println("meberDTO.getName() = " + meberDTO.getName());
+    System.out.println("meberDTO.getAge() = " + meberDTO.getAge());    
+```
+    - disinct 사용 가능
+
+### Paging
+- JPA는 페이징을 다음 두 API로 추상화
+    - setFirstResult 조회 시작 위치
+    - setMaxResult 조회할 데이터 수
+    - 매우 추상화해서 쉽다 디비 방언들을 dialect을 보고 다 적용해줌 oracle, mysql 등등
+    ```java
+            List<Member> result = em.createQuery("select m from Member m order by m.age", Member.class)
+                    .setFirstResult(1)
+                    .setMaxResults(10)
+                    .getResultList();
+            for (Member member1 : result) {
+                System.out.println("member1 = " + member1);
+            }
+    ```
+
+### Join
+- 객체 스타일로 조인이 나감
+    - 내부조인 select m from Member m join m.team t
+    - 외부조인 sleect m from Member m LEFT JOIN m.team t
+- 2.1 부터 on 사용가능
+- 연관 관계 없는 엔티티 외부 조인 가능
+    - 연관 관계가 없어도 엔티티의 조인이 가능
+
+### sub query
+- EXISTS 함수 지원
+- all | any | some | in
+- jpa 표준 스팩은 where having 절에서만 서브쿼리 사용가능
+- but 하이버네이트에서 select 절에서도 사용가능
+- **From절의 서브 쿼리는 jpql에서 불가능**
+    - join으로 풀어줘야 함
+    - 애플리케이션에서 조작하는 형식으로 할 수도 있음
+    - native query
+
+### jpql의 타입 표현
+- 문자 : '
+- 숫자 : 10L, 10D, 10F
+- boolean : true
+- enum : 자바 패키지까지 적어야함  jpabook.MemberType.Admin
+    - querydsl 에서 다 커버 가능
+- 엔티티타입 : Type(m) - > Dtype 를 적어주는거임  상속관계에서
+
+### 조건식
+- 기본 CASE 식
+    ```java
+    String query = 
+    "select " +
+    "case when m.age <= 10 then '학생요금'" +
+    "when m.age >= 60 then '일반요금'" +
+    "else '테스트'" +
+    "end " +
+    "from Member m";
+    List<String> resultList = em.createQuery(query, String.class).getResultList();
+    for (String s : resultList) {
+        System.out.println("s = " + s);
+    }
+    ```
+- 단순 CASE 식
+- COALESCE : null 이면 나온다
+- NULLIF : 두 값이 같으면 null, 아니면 첫번째 값 변환
+```sql
+    select nullif(m.username, '관리자') as username
+    from Member m
+```
+
+### jpql 함수
+- 기본함수
+    - concat
+    - substring
+    - trim
+    - lower upper
+    - length
+    - lcoate
+    - abs, sqrt, mod
+    - size, index
+        - size onetomany 크기의 사이즈 돌려줌
+        - index 
+- 사용자 정의 함수
+    - 사용하는 db 방언을 상속받고 사용자 정의 함수를 등록한다
+    - select function('group_dept')
+    - 기본적으로 dialect를 통해 함수가 미리 등록되어있음
+    - diarect를 상속받아서 코드를 짜고 써야함
+
+
 ### JPA Criteria
 - 자바코드 기반 쿼리 생성
 - 자바코드 기반이기때문에 오타에 대한 걱정이 적음
@@ -232,3 +355,4 @@ refMember.getName();
 
 ### JDBC
 - 영속성 컨텍스트와 상관 없기 때문에 적당한 타이밍에 flush() 해줘야함.
+
