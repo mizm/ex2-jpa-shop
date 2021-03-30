@@ -4,7 +4,7 @@ import javax.persistence.*;
 
 
 @Entity
-public class OrderItem {
+public class OrderItem extends BaseEntity{
 
 	public Long getId() {
 		return id;

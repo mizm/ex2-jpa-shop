@@ -61,3 +61,24 @@ Team t = em.find(Team.class, m.getTeamId());
     - 연결 테이블을 @Entity로 승격
     - member -< memberProduct >- product 관계로 풀어내야함
     - 실무에서는 그냥 테이블에 왠만하면 generate value로 id 값을 잡아주는거 권장
+    
+## @MappedSuperClass
+- 동일한 속성이 있을 때 사용
+- 상속관계 매핑 X / Entity X
+- 추상클래스로 권장
+- 등록일 등록자 수정일 수정자 등등
+- jpa에서는 도메인 상속받을때 @Entity or @MappedSuperClass가 있어야함
+
+## 상속
+- data가 커지면 커질수록 상속을 사용하기가 힘들어질수도있음
+
+
+## proxy와 연관관계
+
+### proxy
+- em.getReference() -> 사용 시 실제 사용시 jpa가 쿼리를 실행함 - proxy객체로 리턴해줌
+- getName -> memberProxy -> 영속성 컨텍스트에 초기화 요청 -> DB -> Member 객체 생성 -> 프록시가 다시 조회
+- 프록시 객체는 처음 사용할 때 한번만 초기화됨
+- 프록시 객체가 실제 엔티티로 바뀌는게 아니고 target이 생기고 접근이 가능함.
+- 타입 체크시 == 이 아닌 instance of 로 비교해야함.
+- 영속성 컨텍스트에 있으면 getReference()는 진짜 객체를 반환해줌 -> 1차 캐시에 있으면 

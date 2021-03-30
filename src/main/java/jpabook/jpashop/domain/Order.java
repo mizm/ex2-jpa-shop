@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "ORDERS")
-public class Order {
+public class Order extends BaseEntity {
 
 	public Long getId() {
 		return id;
