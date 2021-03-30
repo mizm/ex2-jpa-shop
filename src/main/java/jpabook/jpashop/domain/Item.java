@@ -21,6 +21,7 @@ public abstract class Item extends BaseEntity{
 	private int price;
 	private int stockQuantity;
 
+
 	public Long getId() {
 		return id;
 	}
